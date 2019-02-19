@@ -56,7 +56,8 @@ Vagrant.configure("2") do |config|
   # the path on the host to the actual folder. The second argument is
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
-  config.vm.synced_folder "C:/MySharedFolder", "/vagrant_data"
+  config.vm.synced_folder "/localhome/jmack2545/vagrant/vagrant_share", "/vagrant_data"
+  config.vm.synced_folder ".", "/vagrant", disabled: true
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.
@@ -67,12 +68,12 @@ Vagrant.configure("2") do |config|
       vb.gui = true
   
       # Customize the amount of memory on the VM:
-      vb.memory = "4096"
+      vb.memory = "8192"
       vb.name = "Ubuntu-Vagrant"
-      vb.cpus = 4
+      vb.cpus = 6
 
-      vb.customize ["modifyvm", :id, "--usb", "on"]
-      vb.customize ["modifyvm", :id, "--usbxhci", "on"]
+      #vb.customize ["modifyvm", :id, "--usb", "on"]
+      #vb.customize ["modifyvm", :id, "--usbxhci", "on"]
       vb.customize ["modifyvm", :id, "--vram", "128"]
       vb.customize ["modifyvm", :id, "--clipboard", "hosttoguest"]
   end
@@ -84,13 +85,13 @@ Vagrant.configure("2") do |config|
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
-    # Helps speed up package fetching and installation by explicitly pointing to US sources
     sudo sed -i "s/archive.ubuntu.com/us.archive.ubuntu.com/g" /etc/apt/sources.list
     
     # Needed for apt to find zlib1g:i386
     sudo dpkg --add-architecture i386
 	
     sudo apt update
+    # Optionally, install a desktop environment
     # sudo apt -y install ubuntu-desktop virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11 firefox
 
     # Petalinux dependencies
@@ -101,7 +102,7 @@ Vagrant.configure("2") do |config|
     sudo chgrp vagrant /opt/petalinux
     # Assumes that the petalinux installer is available on the shared folder
     # Didn't want to run from the shared folder in case there is overhead associated with that
-    cp /vagrant_data/petalinux-v2018.3-final-installer.run /tmp
+    cp /vagrant_data/petalinux-v2018.2-final-installer.run /tmp
     # https://github.com/mitre-cyber-academy/2019-ectf-vagrant/blob/master/provision/scripts/petalinux_install.sh#L12
     yes | /tmp/petalinux-v2018.3-final-installer.run /opt/petalinux > /dev/null
      
